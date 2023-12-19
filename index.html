@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Tank Problem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #waterTank {
+            width: 500px;
+            height: 300px;
+            border: 1px solid #ccc;
+            position: relative;
+        }
+
+        rect {
+            fill: #3498db;
+        }
+
+        #waterUnitsText {
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <svg id="waterTank">
+
+        </svg>
+        <div id="waterUnitsText"></div>
+    </div>
+    <script>
+        let trappedWaterArray = [];
+
+        function calculateWaterUnits(heights) {
+            let n = heights.length;
+            let leftMax = Array(n).fill(0);
+            let rightMax = Array(n).fill(0);
+
+            let maxLeft = 0;
+            for (let i = 0; i < n; i++) {
+                leftMax[i] = maxLeft;
+                maxLeft = Math.max(maxLeft, heights[i]);
+            }
+
+            let maxRight = 0;
+            for (let i = n - 1; i >= 0; i--) {
+                rightMax[i] = maxRight;
+                maxRight = Math.max(maxRight, heights[i]);
+            }
+
+            let waterUnits = 0;
+            for (let i = 0; i < n; i++) {
+                let minHeight = Math.min(leftMax[i], rightMax[i]);
+                if (minHeight - heights[i] > 0) {
+                    trappedWaterArray.push(minHeight - heights[i]);
+                } else {
+                    trappedWaterArray.push(0);
+                }
+                if (minHeight > heights[i]) {
+                    waterUnits += minHeight - heights[i];
+                }
+            }
+            return waterUnits;
+        }
+
+        function drawWaterTank(heights) {
+            const waterTank = document.getElementById("waterTank");
+            waterTank.innerHTML = ""; // Clear previous drawing
+
+            const tankWidth = 40;
+            const tankMargin = 10;
+            const tankHeight = 300; // Adjusted to match the SVG height
+            const unitHeight = tankHeight / Math.max(...heights); // Adjusted to normalize the heights
+
+            for (let i = 0; i < heights.length; i++) {
+                const x = i * (tankWidth + tankMargin);
+                const y = tankHeight - unitHeight * trappedWaterArray[i]; // Adjusted y-coordinate
+                const rectHeight = unitHeight * trappedWaterArray[i];
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", y);
+                rect.setAttribute("width", tankWidth);
+                rect.setAttribute("height", rectHeight);
+
+                waterTank.appendChild(rect);
+            }
+        }
+
+        const heights = [0, 4, 0, 0, 0, 6, 0, 6, 4, 0];
+        const waterUnits = calculateWaterUnits(heights);
+        drawWaterTank(heights);
+
+        const waterUnitsText = document.getElementById("waterUnitsText");
+        waterUnitsText.textContent = `Water Units: ${waterUnits}`;
+        console.log("Trapped Water Array:", trappedWaterArray);
+        console.log("Water Units:", waterUnits);
+    </script>
+</body>
+
+</html>
